@@ -1,23 +1,22 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useOutletContext } from 'react-router-dom'
 import ProductCard from '../components/ProductCard'
-import { getShopSettings, listProducts } from '../lib/api'
-import { shopIsOpen } from '../lib/format'
+import { listProducts } from '../lib/api'
 import { useApp } from '../context/AppContext'
 
 export default function HomePage() {
   const { t, language } = useApp()
-  const [settings, setSettings] = useState(null)
   const [products, setProducts] = useState([])
   const [error, setError] = useState('')
+  const { shopOpen, shopStatusLoading } = useOutletContext()
 
   useEffect(() => {
-    Promise.all([getShopSettings(), listProducts()])
-      .then(([s, p]) => { setSettings(s); setProducts(p.slice(0, 4)) })
+    listProducts()
+      .then((p) => setProducts(p.slice(0, 4)))
       .catch((e) => setError(e.message))
   }, [])
 
-  const open = shopIsOpen(settings)
+  const open = !shopStatusLoading && shopOpen
   return (
     <>
       <section className="hero-section">
@@ -27,7 +26,9 @@ export default function HomePage() {
             <h1>{language === 'th' ? 'สดชื่นทุกแก้ว' : 'A little happiness in every cup'}<br /><em>{language === 'th' ? 'อร่อยจังทุกวัน' : 'made fresh for you'}</em></h1>
             <p>{language === 'th' ? 'เครื่องดื่มน่ารัก ราคาเป็นมิตร เลือกระดับความหวานได้ พร้อมสะสมแต้มทุกแก้ว' : 'Cute drinks, friendly prices, customizable sweetness, and rewards with every cup.'}</p>
             <div className="hero-actions">
-              <Link to="/menu" className="button button-primary">🥤 {t('orderNow')}</Link>
+              {open
+                ? <Link to="/menu" className="button button-primary">🥤 {t('orderNow')}</Link>
+                : <span className="button button-primary button-disabled" aria-disabled="true">🌙 ร้านปิดแล้ว</span>}
               <Link to="/points" className="button button-outline">⭐ {t('points')}</Link>
             </div>
             <div className={`shop-status ${open ? 'is-open' : 'is-closed'}`}>
@@ -56,17 +57,19 @@ export default function HomePage() {
 
       <section className="section">
         <div className="container">
-          <div className="section-heading"><div><span className="eyebrow">POPULAR</span><h2>{t('featured')}</h2></div><Link to="/menu" className="text-link">{t('allMenu')} →</Link></div>
+          <div className="section-heading"><div><span className="eyebrow">POPULAR</span><h2>{t('featured')}</h2></div>{open ? <Link to="/menu" className="text-link">{t('allMenu')} →</Link> : <span className="text-link disabled-link">ร้านปิด</span>}</div>
           {error && <div className="alert alert-error">{error}</div>}
           <div className="product-grid">
-            {products.map((p) => <ProductCard key={p.id} product={p} />)}
+            {products.map((p) => <ProductCard key={p.id} product={p} shopOpen={open} />)}
           </div>
         </div>
       </section>
 
       <section className="section promo-section">
         <div className="container promo-card">
-          <div><span className="promo-icon">🌞</span><span className="eyebrow">MORNING DEAL</span><h2>08:00 - 10:00<br /><em>แก้วละ 25 บาท</em></h2><p>โปรโมชั่นเช้าใช้ร่วมกับการแลกแต้มไม่ได้ เลือกได้ 1 โปรโมชั่นต่อออเดอร์</p><Link className="button button-primary" to="/menu">เลือกเครื่องดื่ม</Link></div>
+          <div><span className="promo-icon">🌞</span><span className="eyebrow">MORNING DEAL</span><h2>08:00 - 10:00<br /><em>แก้วละ 25 บาท</em></h2><p>โปรโมชั่นเช้าใช้ร่วมกับการแลกแต้มไม่ได้ เลือกได้ 1 โปรโมชั่นต่อออเดอร์</p>{open
+              ? <Link className="button button-primary" to="/menu">เลือกเครื่องดื่ม</Link>
+              : <span className="button button-primary button-disabled" aria-disabled="true">ร้านปิดอยู่</span>}</div>
           <div className="promo-art">🧋<span>✨</span></div>
         </div>
       </section>
