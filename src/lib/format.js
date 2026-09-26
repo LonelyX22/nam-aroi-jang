@@ -17,7 +17,9 @@ export function isThaiMobile(value = '') {
 }
 
 export function shopIsOpen(settings) {
-  if (!settings || settings.force_closed) return false
+  if (!settings) return false
+  if (settings.force_open) return true
+  if (settings.force_closed) return false
   const now = new Date()
   const parts = new Intl.DateTimeFormat('en-GB', {
     timeZone: 'Asia/Bangkok',
