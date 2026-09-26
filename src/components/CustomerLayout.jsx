@@ -59,10 +59,10 @@ export default function CustomerLayout() {
 
   return (
     <div className="site-shell">
-      {!supabaseConfigured && <div className="demo-banner">DEMO MODE — ยังไม่เชื่อม Supabase ข้อมูลจะอยู่เฉพาะ Browser นี้</div>}
+      {!supabaseConfigured && <div className="demo-banner">{language === 'th' ? 'DEMO MODE — ยังไม่เชื่อม Supabase ข้อมูลจะอยู่เฉพาะ Browser นี้' : 'DEMO MODE — Supabase is not connected. Data is stored only in this browser.'}</div>}
       {closed && (
         <div className="closed-strip" role="status">
-          🌙 ร้านปิดแล้ว • เปิดรับออเดอร์ 08:00 - 20:00 • ยังเช็คแต้มและติดตามออเดอร์ได้
+          🌙 {t('shopClosedBanner')}
         </div>
       )}
       <header className="customer-header">
@@ -70,8 +70,8 @@ export default function CustomerLayout() {
           <Link to="/" className="brand-link">
             <img src={`${import.meta.env.BASE_URL}logo.png`} alt={SHOP.nameTh} className="brand-logo" />
             <div className="brand-text">
-              <strong>{SHOP.nameTh}</strong>
-              <span>สดชื่นทุกแก้ว อร่อยจังทุกวัน</span>
+              <strong>{language === 'th' ? SHOP.nameTh : SHOP.nameEn}</strong>
+              <span>{t('brandTagline')}</span>
             </div>
           </Link>
           <nav className="desktop-nav">
@@ -107,9 +107,9 @@ export default function CustomerLayout() {
       </main>
       <footer className="customer-footer">
         <div className="container footer-grid">
-          <div><strong>{SHOP.nameTh}</strong><p>เปิดทุกวัน {SHOP.openTime} - {SHOP.closeTime}</p></div>
-          <div><strong>ติดต่อ</strong><p>{SHOP.phone}<br />Facebook / LINE / Instagram: {SHOP.nameTh}</p></div>
-          <div><Link to="/admin/login" className="footer-admin-link">เข้าสู่ระบบหลังบ้าน</Link></div>
+          <div><strong>{language === 'th' ? SHOP.nameTh : SHOP.nameEn}</strong><p>{t('openDaily')} {SHOP.openTime} - {SHOP.closeTime}</p></div>
+          <div><strong>{language === 'th' ? 'ติดต่อ' : 'Contact'}</strong><p>{SHOP.phone}<br />Facebook / LINE / Instagram: {language === 'th' ? SHOP.nameTh : SHOP.nameEn}</p></div>
+          <div><Link to="/admin/login" className="footer-admin-link">{language === 'th' ? 'เข้าสู่ระบบหลังบ้าน' : 'Admin login'}</Link></div>
         </div>
       </footer>
       <nav className="mobile-bottom-nav">
