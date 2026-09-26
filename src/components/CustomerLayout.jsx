@@ -14,29 +14,26 @@ export default function CustomerLayout() {
 
   useEffect(() => {
     let mounted = true
-    let timer
 
-    async function refreshStatus() {
-      try {
-        const settings = await getShopSettings()
+    getShopSettings()
+      .then((settings) => {
         if (!mounted) return
         setShopSettings(settings)
         setShopOpen(shopIsOpen(settings))
-      } finally {
+      })
+      .finally(() => {
         if (mounted) setShopStatusLoading(false)
-      }
-    }
+      })
 
-    refreshStatus()
-    timer = window.setInterval(() => {
-      if (shopSettings) setShopOpen(shopIsOpen(shopSettings))
-      else refreshStatus()
-    }, 30000)
+    return () => { mounted = false }
+  }, [])
 
-    return () => {
-      mounted = false
-      window.clearInterval(timer)
-    }
+  useEffect(() => {
+    if (!shopSettings) return undefined
+
+    const refreshClockStatus = () => setShopOpen(shopIsOpen(shopSettings))
+    const timer = window.setInterval(refreshClockStatus, 30000)
+    return () => window.clearInterval(timer)
   }, [shopSettings])
 
   const closed = !shopStatusLoading && !shopOpen
