@@ -31,8 +31,8 @@ export default function MenuPage() {
         <div className="page-title"><span className="eyebrow">DRINK MENU</span><h1>{t('allMenu')}</h1><p>{language === 'th' ? 'กดเลือกเมนูเพื่อดูส่วนผสม แคลอรี และเลือกระดับความหวาน' : 'Choose a drink to view ingredients, calories, and sweetness options.'}</p></div>
         <div className="search-bar"><span>🔎</span><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={language === 'th' ? 'ค้นหาเมนู...' : 'Search drinks...'} /></div>
         {error && <div className="alert alert-error">{error}</div>}
-        {loading ? <div className="page-loader">กำลังโหลดเมนู...</div> : <div className="product-grid">{filtered.map((p) => <ProductCard key={p.id} product={p} />)}</div>}
-        {!loading && filtered.length === 0 && <div className="empty-state">🥤<h3>ไม่พบเมนู</h3></div>}
+        {loading ? <div className="page-loader">{t('loadingMenu')}</div> : <div className="product-grid">{filtered.map((p) => <ProductCard key={p.id} product={p} />)}</div>}
+        {!loading && filtered.length === 0 && <div className="empty-state">🥤<h3>{t('noMenu')}</h3></div>}
       </div>
     </section>
   )
