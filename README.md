@@ -63,7 +63,7 @@ npm run dev
 Demo Admin:
 
 ```text
-Email: o5170797@gmail.com
+Email: namaual@gmail.com
 Password: demo1234
 ```
 
@@ -83,7 +83,7 @@ supabase/seed.sql
 4. ไปที่ `Authentication > Users` แล้วสร้าง Owner:
 
 ```text
-Email: o5170797@gmail.com
+Email: namaual@gmail.com
 Password: ตั้งรหัสผ่านจริงที่แข็งแรง
 ```
 
