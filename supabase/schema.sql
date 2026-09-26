@@ -284,7 +284,7 @@ begin
     'order_items', v_items
   );
 end;
-$;
+$$;
 
 create or replace function public.create_order(p_payload jsonb)
 returns jsonb
