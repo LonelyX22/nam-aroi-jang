@@ -10,7 +10,7 @@ export const SHOP = {
   deliveryProvince: 'นครปฐม',
   deliveryFee: 0,
   promptPay: '06-1564-0529',
-  ownerEmail: 'o5170797@gmail.com',
+  ownerEmail: 'namaual@gmail.com',
 }
 
 export const ORDER_STATUSES = [
