@@ -612,3 +612,39 @@ th { color: #8c7169; font-size: 11px; text-transform: uppercase; letter-spacing:
     justify-content: center;
   }
 }
+
+
+/* Admin shop status controls */
+.shop-mode-panel {
+  display: grid;
+  gap: 16px;
+  margin: 10px 0 24px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: #fffaf7;
+}
+
+.shop-mode-status {
+  display: grid;
+  gap: 4px;
+}
+
+.shop-mode-status strong {
+  font-size: 18px;
+  color: var(--brown);
+}
+
+.shop-mode-status small {
+  color: var(--muted);
+}
+
+.shop-mode-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.shop-mode-actions .button {
+  min-width: 140px;
+}
