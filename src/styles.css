@@ -703,3 +703,156 @@ th { color: #8c7169; font-size: 11px; text-transform: uppercase; letter-spacing:
   font-size: 14px;
   letter-spacing: .08em;
 }
+
+
+/* === RESPONSIVE CUSTOMER TOP NAV v2 === */
+.mobile-top-nav{display:none}
+
+@media(max-width:1100px){
+  .desktop-nav{display:none!important}
+  .brand-link{min-width:0!important;margin-right:auto}
+  .brand-text span{display:none!important}
+
+  .customer-header{
+    overflow:visible;
+  }
+
+  .header-inner{
+    min-height:70px;
+    gap:10px;
+    padding-top:7px;
+    padding-bottom:7px;
+  }
+
+  .header-actions{
+    margin-left:auto;
+    flex:0 0 auto;
+  }
+
+  .mobile-top-nav{
+    display:block;
+    position:relative;
+    border-top:1px solid rgba(255,154,178,.14);
+    background:
+      linear-gradient(180deg,rgba(255,251,248,.98),rgba(255,245,247,.98));
+    box-shadow:0 10px 24px rgba(113,48,31,.06);
+  }
+
+  .mobile-top-nav:after{
+    content:"";
+    position:absolute;
+    left:7%;
+    right:7%;
+    top:0;
+    height:1px;
+    background:linear-gradient(90deg,transparent,rgba(255,111,145,.30),transparent);
+    pointer-events:none;
+  }
+
+  .mobile-top-nav-inner{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    min-height:52px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    overscroll-behavior-x:contain;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+    padding-top:6px;
+    padding-bottom:6px;
+    padding-left:max(11px,env(safe-area-inset-left));
+    padding-right:max(11px,env(safe-area-inset-right));
+  }
+
+  .mobile-top-nav-inner::-webkit-scrollbar{display:none}
+
+  .mobile-top-nav-inner a{
+    flex:0 0 auto;
+    min-height:38px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0 15px;
+    border-radius:12px;
+    color:#826b64;
+    font-size:12px;
+    font-weight:900;
+    text-decoration:none;
+    white-space:nowrap;
+    border:1px solid transparent;
+    transition:.2s ease;
+  }
+
+  .mobile-top-nav-inner a:hover{
+    color:#d94f71;
+    background:rgba(255,111,145,.06);
+  }
+
+  .mobile-top-nav-inner a.active{
+    color:white;
+    background:linear-gradient(135deg,#ff6f91,#ff927d);
+    border-color:rgba(255,255,255,.42);
+    box-shadow:
+      0 10px 22px rgba(255,111,145,.18),
+      inset 0 1px rgba(255,255,255,.35);
+  }
+
+  .mobile-top-nav-inner a.nav-disabled{
+    opacity:.45;
+  }
+}
+
+@media(max-width:680px){
+  body{padding-bottom:0!important}
+
+  .header-inner{
+    min-height:66px;
+    gap:8px;
+  }
+
+  .brand-logo{
+    width:46px;
+    height:46px;
+    border-radius:14px;
+  }
+
+  .brand-text strong{
+    font-size:16px;
+    white-space:nowrap;
+  }
+
+  .language-switch{
+    min-width:40px;
+    width:40px;
+    height:40px;
+  }
+
+  .cart-button{
+    display:none!important;
+  }
+
+  .mobile-top-nav-inner{
+    justify-content:flex-start;
+    width:100%;
+    min-height:49px;
+    gap:4px;
+  }
+
+  .mobile-top-nav-inner a{
+    min-height:36px;
+    padding:0 13px;
+    font-size:11px;
+    border-radius:10px;
+  }
+
+  /* Use the same top navigation pattern as the shabu project. */
+  .mobile-bottom-nav{
+    display:none!important;
+  }
+
+  .customer-footer{
+    padding-bottom:28px!important;
+  }
+}
