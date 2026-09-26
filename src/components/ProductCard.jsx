@@ -17,10 +17,10 @@ export default function ProductCard({ product, shopOpen = true }) {
         <strong className="price">{formatMoney(product.price)}</strong>
       </div>
       {!shopOpen
-        ? <span className="sold-out-label">ร้านปิดอยู่</span>
+        ? <span className="sold-out-label">{t('shopClosedShort')}</span>
         : product.is_available
           ? <Link to={`/menu/${product.id}`} className="button button-soft">{t('viewDetails')}</Link>
-          : <span className="sold-out-label">สินค้าหมด</span>}
+          : <span className="sold-out-label">{t('soldOut')}</span>}
     </article>
   )
 }
