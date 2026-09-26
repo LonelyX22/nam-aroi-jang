@@ -1,0 +1,17 @@
+import { useEffect, useState } from 'react'
+import { deletePromotion, listPromotions, savePromotion } from '../../lib/api'
+
+const empty = { name_th: '', name_en: '', code: '', discount_type: 'fixed_price_per_item', fixed_item_price: 25, start_time: '08:00', end_time: '10:00', is_active: true }
+
+export default function PromotionsPage() {
+  const [promos, setPromos] = useState([])
+  const [form, setForm] = useState(empty)
+  const [editing, setEditing] = useState(false)
+  const [error, setError] = useState('')
+  async function load() { setPromos(await listPromotions()) }
+  useEffect(() => { load().catch((e) => setError(e.message)) }, [])
+  function edit(p) { setForm({ ...p, start_time: p.start_time?.slice(0,5) || '', end_time: p.end_time?.slice(0,5) || '' }); setEditing(true) }
+  async function submit(e) { e.preventDefault(); setError(''); try { await savePromotion({ ...form, fixed_item_price: Number(form.fixed_item_price) }); setEditing(false); await load() } catch (e2) { setError(e2.message) } }
+  async function remove(p) { if (!window.confirm(`ลบโปรโมชั่น ${p.name_th}?`)) return; try { await deletePromotion(p.id); await load() } catch (e) { setError(e.message) } }
+  return <div><div className="admin-page-head"><div><span className="eyebrow">PROMOTIONS</span><h1>โปรโมชั่น</h1><p>ลูกค้าเลือกได้เพียง 1 โปรโมชั่นต่อ Order</p></div><button className="button button-primary" onClick={() => { setForm(empty); setEditing(true) }}>+ เพิ่มโปรโมชั่น</button></div>{error && <div className="alert alert-error">{error}</div>}<div className="promo-admin-grid">{promos.map((p) => <div className="admin-card promo-admin-card" key={p.id}><div><span className={`availability ${p.is_active ? 'on' : 'off'}`}>{p.is_active ? 'เปิดใช้' : 'ปิด'}</span><h2>{p.name_th}</h2><p>{p.name_en}</p></div><div className="promo-rule"><strong>{p.discount_type === 'fixed_price_per_item' ? `${p.fixed_item_price} บาท/แก้ว` : p.discount_type}</strong><span>{p.start_time?.slice(0,5)} - {p.end_time?.slice(0,5)}</span></div><div className="row-actions"><button onClick={() => edit(p)}>แก้ไข</button><button className="danger" onClick={() => remove(p)}>ลบ</button></div></div>)}</div>{editing && <div className="modal-backdrop"><form className="modal-card" onSubmit={submit}><button type="button" className="modal-close" onClick={() => setEditing(false)}>×</button><h2>{form.id ? 'แก้โปรโมชั่น' : 'เพิ่มโปรโมชั่น'}</h2><div className="form-grid two"><label>ชื่อ TH<input value={form.name_th} onChange={(e) => setForm({ ...form, name_th: e.target.value })} required /></label><label>Name EN<input value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} required /></label><label>Code<input value={form.code || ''} onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })} /></label><label>ราคาต่อแก้ว<input type="number" min="0" value={form.fixed_item_price} onChange={(e) => setForm({ ...form, fixed_item_price: e.target.value })} /></label><label>เริ่ม<input type="time" value={form.start_time || ''} onChange={(e) => setForm({ ...form, start_time: e.target.value })} /></label><label>สิ้นสุด<input type="time" value={form.end_time || ''} onChange={(e) => setForm({ ...form, end_time: e.target.value })} /></label><label className="toggle-label full"><input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} /> เปิดใช้งาน</label></div><button className="button button-primary button-wide">บันทึก</button></form></div>}</div>
+}

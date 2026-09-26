@@ -1,0 +1,16 @@
+import { useEffect, useState } from 'react'
+import { invokeStaffAction, listStaff } from '../../lib/api'
+
+export default function StaffPage() {
+  const [staff, setStaff] = useState([])
+  const [open, setOpen] = useState(false)
+  const [form, setForm] = useState({ display_name: '', email: '' })
+  const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
+  const [loading, setLoading] = useState(false)
+  async function load() { setStaff(await listStaff()) }
+  useEffect(() => { load().catch((e) => setError(e.message)) }, [])
+  async function invite(e) { e.preventDefault(); setLoading(true); setError(''); try { await invokeStaffAction('invite', form); setOpen(false); setForm({ display_name:'', email:'' }); setMessage('ส่งคำเชิญ Staff แล้ว'); await load() } catch (e2) { setError(e2.message) } finally { setLoading(false) } }
+  async function action(s, type) { const label = type === 'remove' ? 'ลบ' : type === 'disable' ? 'ปิดใช้งาน' : 'เปิดใช้งาน'; if (!window.confirm(`${label} ${s.email}?`)) return; try { await invokeStaffAction(type, { user_id: s.id }); await load() } catch (e) { setError(e.message) } }
+  return <div><div className="admin-page-head"><div><span className="eyebrow">OWNER ONLY</span><h1>จัดการ Staff</h1><p>Owner เพิ่มพนักงานภายหลังได้ โดยไม่ Hard-code บัญชีใน Source Code</p></div><button className="button button-primary" onClick={() => setOpen(true)}>+ เพิ่ม Staff</button></div>{error && <div className="alert alert-error">{error}</div>}{message && <div className="alert alert-success">{message}</div>}<div className="admin-card"><div className="table-wrap"><table><thead><tr><th>ชื่อ</th><th>Email</th><th>Role</th><th>สถานะ</th><th></th></tr></thead><tbody>{staff.map((s) => <tr key={s.id}><td><strong>{s.display_name || '-'}</strong></td><td>{s.email}</td><td><span className={`role-badge role-${s.role}`}>{s.role}</span></td><td><span className={`availability ${s.is_active ? 'on' : 'off'}`}>{s.is_active ? 'Active' : 'Disabled'}</span></td><td>{s.role !== 'owner' && <div className="row-actions">{s.is_active ? <button onClick={() => action(s,'disable')}>ปิดใช้งาน</button> : <button onClick={() => action(s,'enable')}>เปิดใช้งาน</button>}<button className="danger" onClick={() => action(s,'remove')}>ลบ</button></div>}</td></tr>)}</tbody></table></div></div>{open && <div className="modal-backdrop"><form className="modal-card" onSubmit={invite}><button type="button" className="modal-close" onClick={() => setOpen(false)}>×</button><h2>เพิ่ม Staff</h2><p>ระบบจะส่ง Email Invitation ผ่าน Supabase Auth</p><label>ชื่อพนักงาน<input value={form.display_name} onChange={(e) => setForm({ ...form, display_name: e.target.value })} required /></label><label>Email<input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required /></label><div className="permission-preview"><strong>สิทธิ์ Staff เริ่มต้น</strong><span>✓ ดูและจัดการ Order</span><span>✓ ตรวจสลิป</span><span>✓ ดูข้อมูลลูกค้าที่จำเป็น</span><span>✕ จัดการ Staff / Settings</span></div><button className="button button-primary button-wide" disabled={loading}>{loading ? 'กำลังส่งคำเชิญ...' : 'ส่งคำเชิญ Staff'}</button></form></div>}</div>
+}
