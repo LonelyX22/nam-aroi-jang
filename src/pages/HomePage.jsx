@@ -22,13 +22,13 @@ export default function HomePage() {
       <section className="hero-section">
         <div className="container hero-grid">
           <div className="hero-copy">
-            <span className="eyebrow">NAM AROI JANG • นครปฐม</span>
+            <span className="eyebrow">{language === 'th' ? 'NAM AROI JANG • นครปฐม' : 'NAM AROI JANG • NAKHON PATHOM'}</span>
             <h1>{language === 'th' ? 'สดชื่นทุกแก้ว' : 'A little happiness in every cup'}<br /><em>{language === 'th' ? 'อร่อยจังทุกวัน' : 'made fresh for you'}</em></h1>
             <p>{language === 'th' ? 'เครื่องดื่มน่ารัก ราคาเป็นมิตร เลือกระดับความหวานได้ พร้อมสะสมแต้มทุกแก้ว' : 'Cute drinks, friendly prices, customizable sweetness, and rewards with every cup.'}</p>
             <div className="hero-actions">
               {open
                 ? <Link to="/menu" className="button button-primary">🥤 {t('orderNow')}</Link>
-                : <span className="button button-primary button-disabled" aria-disabled="true">🌙 ร้านปิดแล้ว</span>}
+                : <span className="button button-primary button-disabled" aria-disabled="true">🌙 {t('shopClosedNow')}</span>}
               <Link to="/points" className="button button-outline">⭐ {t('points')}</Link>
             </div>
             <div className={`shop-status ${open ? 'is-open' : 'is-closed'}`}>
@@ -39,25 +39,25 @@ export default function HomePage() {
           <div className="hero-visual">
             <div className="bubble bubble-one" />
             <div className="bubble bubble-two" />
-            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="น้ำอร่อยจัง" />
-            <div className="hero-sticker sticker-one">10 แต้ม = ฟรี 1 แก้ว ⭐</div>
-            <div className="hero-sticker sticker-two">ส่งฟรีในนครปฐม 🛵</div>
+            <img src={`${import.meta.env.BASE_URL}logo.png`} alt={language === 'th' ? 'น้ำอร่อยจัง' : 'Nam Aroi Jang'} />
+            <div className="hero-sticker sticker-one">{t('tenPointsFree')} ⭐</div>
+            <div className="hero-sticker sticker-two">{t('freeDelivery')} {language === 'th' ? 'ในนครปฐม' : 'in Nakhon Pathom'} 🛵</div>
           </div>
         </div>
       </section>
 
       <section className="feature-strip">
         <div className="container feature-grid">
-          <div>🕗 <strong>08:00 - 20:00</strong><span>เปิดทุกวัน</span></div>
-          <div>⭐ <strong>1 แก้ว = 1 แต้ม</strong><span>แต้มไม่มีวันหมดอายุ</span></div>
-          <div>🛵 <strong>ส่งฟรี</strong><span>ภายในจังหวัดนครปฐม</span></div>
-          <div>💳 <strong>จ่ายได้หลายแบบ</strong><span>เงินสด / PromptPay / โอน</span></div>
+          <div>🕗 <strong>08:00 - 20:00</strong><span>{t('openDaily')}</span></div>
+          <div>⭐ <strong>{t('pointRate')}</strong><span>{t('pointsNeverExpire')}</span></div>
+          <div>🛵 <strong>{t('freeDelivery')}</strong><span>{t('withinNakhonPathom')}</span></div>
+          <div>💳 <strong>{t('multiplePayments')}</strong><span>{t('paymentMethodsShort')}</span></div>
         </div>
       </section>
 
       <section className="section">
         <div className="container">
-          <div className="section-heading"><div><span className="eyebrow">POPULAR</span><h2>{t('featured')}</h2></div>{open ? <Link to="/menu" className="text-link">{t('allMenu')} →</Link> : <span className="text-link disabled-link">ร้านปิด</span>}</div>
+          <div className="section-heading"><div><span className="eyebrow">POPULAR</span><h2>{t('featured')}</h2></div>{open ? <Link to="/menu" className="text-link">{t('allMenu')} →</Link> : <span className="text-link disabled-link">{t('closed')}</span>}</div>
           {error && <div className="alert alert-error">{error}</div>}
           <div className="product-grid">
             {products.map((p) => <ProductCard key={p.id} product={p} shopOpen={open} />)}
@@ -67,9 +67,9 @@ export default function HomePage() {
 
       <section className="section promo-section">
         <div className="container promo-card">
-          <div><span className="promo-icon">🌞</span><span className="eyebrow">MORNING DEAL</span><h2>08:00 - 10:00<br /><em>แก้วละ 25 บาท</em></h2><p>โปรโมชั่นเช้าใช้ร่วมกับการแลกแต้มไม่ได้ เลือกได้ 1 โปรโมชั่นต่อออเดอร์</p>{open
-              ? <Link className="button button-primary" to="/menu">เลือกเครื่องดื่ม</Link>
-              : <span className="button button-primary button-disabled" aria-disabled="true">ร้านปิดอยู่</span>}</div>
+          <div><span className="promo-icon">🌞</span><span className="eyebrow">MORNING DEAL</span><h2>08:00 - 10:00<br /><em>{t('morningPrice')}</em></h2><p>{t('morningPromoDesc')}</p>{open
+              ? <Link className="button button-primary" to="/menu">{t('chooseDrink')}</Link>
+              : <span className="button button-primary button-disabled" aria-disabled="true">{t('shopClosedShort')}</span>}</div>
           <div className="promo-art">🧋<span>✨</span></div>
         </div>
       </section>
