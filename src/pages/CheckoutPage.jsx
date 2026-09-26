@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useOutletContext } from 'react-router-dom'
 import { createOrder, getCustomerPoints, getShopSettings, listPromotions, uploadPaymentSlip } from '../lib/api'
 import { formatMoney, isThaiMobile, shopIsOpen } from '../lib/format'
 import { SHOP } from '../lib/constants'
 import { useApp } from '../context/AppContext'
 import PromptPayQR from '../components/PromptPayQR'
+import ClosedStoreNotice from '../components/ClosedStoreNotice'
 
 function promoAvailable(promo) {
   if (!promo.is_active) return false
@@ -25,6 +26,7 @@ export default function CheckoutPage() {
   const [error, setError] = useState('')
   const [slip, setSlip] = useState(null)
   const [reward, setReward] = useState('none')
+  const { shopOpen, shopStatusLoading } = useOutletContext()
   const [form, setForm] = useState({
     name: '', phone: '', fulfillment_type: 'pickup', payment_method: 'cash',
     house: '', road: '', subdistrict: '', district: '', postcode: '', note: '',
@@ -55,10 +57,12 @@ export default function CheckoutPage() {
   function update(key, value) { setForm((f) => ({ ...f, [key]: value })) }
 
   function validate() {
-    if (!cart.length) return 'ตะกร้าสินค้าว่าง'
+    if (!shopStatusLoading && !shopOpen) return <section className="section page-section"><div className="container narrow-container"><ClosedStoreNotice /></div></section>
+
+  if (!cart.length) return 'ตะกร้าสินค้าว่าง'
     if (!form.name.trim()) return 'กรุณากรอกชื่อลูกค้า'
     if (!isThaiMobile(form.phone)) return 'กรุณากรอกเบอร์โทร 10 หลักให้ถูกต้อง'
-    if (!shopIsOpen(settings)) return 'ขณะนี้ร้านปิดรับออเดอร์ (08:00 - 20:00)'
+    if (!shopOpen) return 'ขณะนี้ร้านปิดรับออเดอร์ (08:00 - 20:00)'
     if (form.fulfillment_type === 'delivery') {
       if (!form.house.trim() || !form.subdistrict.trim() || !form.district.trim() || !/^\d{5}$/.test(form.postcode)) return 'กรุณากรอกที่อยู่จัดส่งให้ครบถ้วน'
     }
@@ -120,7 +124,7 @@ export default function CheckoutPage() {
           <div className="form-card"><h2>5. {t('note')}</h2><textarea rows="3" value={form.note} onChange={(e) => update('note', e.target.value)} placeholder="เช่น ไม่ใส่น้ำแข็ง / โทรก่อนถึง" maxLength={300} /></div>
         </form>
 
-        <aside className="order-summary-card"><h2>สรุปออเดอร์</h2><div className="summary-items">{cart.map((x) => <div key={x.key}><span>{language === 'th' ? x.product.name_th : x.product.name_en} × {x.quantity}<small>หวาน {x.sweetness}%</small></span><strong>{formatMoney(Number(x.product.price) * x.quantity)}</strong></div>)}</div><hr /><div className="summary-line"><span>{t('subtotal')}</span><strong>{formatMoney(cartSubtotal)}</strong></div>{estimatedDiscount > 0 && <div className="summary-line discount"><span>ส่วนลดโดยประมาณ</span><strong>-{formatMoney(estimatedDiscount)}</strong></div>}<div className="summary-line"><span>{t('deliveryFee')}</span><strong>{deliveryFee ? formatMoney(deliveryFee) : 'ฟรี'}</strong></div><div className="summary-total"><span>{t('total')}</span><strong>{formatMoney(estimatedTotal)}</strong></div><button onClick={submit} disabled={submitting || !shopIsOpen(settings)} className="button button-primary button-wide">{submitting ? 'กำลังสร้าง Order...' : `✓ ${t('placeOrder')}`}</button>{settings && !shopIsOpen(settings) && <div className="alert alert-warning">ร้านเปิดรับออเดอร์ 08:00 - 20:00</div>}<small className="secure-note">🔒 ราคาจริงตรวจจาก Database ก่อนสร้าง Order</small></aside>
+        <aside className="order-summary-card"><h2>สรุปออเดอร์</h2><div className="summary-items">{cart.map((x) => <div key={x.key}><span>{language === 'th' ? x.product.name_th : x.product.name_en} × {x.quantity}<small>หวาน {x.sweetness}%</small></span><strong>{formatMoney(Number(x.product.price) * x.quantity)}</strong></div>)}</div><hr /><div className="summary-line"><span>{t('subtotal')}</span><strong>{formatMoney(cartSubtotal)}</strong></div>{estimatedDiscount > 0 && <div className="summary-line discount"><span>ส่วนลดโดยประมาณ</span><strong>-{formatMoney(estimatedDiscount)}</strong></div>}<div className="summary-line"><span>{t('deliveryFee')}</span><strong>{deliveryFee ? formatMoney(deliveryFee) : 'ฟรี'}</strong></div><div className="summary-total"><span>{t('total')}</span><strong>{formatMoney(estimatedTotal)}</strong></div><button onClick={submit} disabled={submitting || !shopOpen} className="button button-primary button-wide">{submitting ? 'กำลังสร้าง Order...' : `✓ ${t('placeOrder')}`}</button>{!shopStatusLoading && !shopOpen && <div className="alert alert-warning">ร้านเปิดรับออเดอร์ 08:00 - 20:00</div>}<small className="secure-note">🔒 ราคาจริงตรวจจาก Database ก่อนสร้าง Order</small></aside>
       </div>
     </section>
   )
