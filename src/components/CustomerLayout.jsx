@@ -101,6 +101,30 @@ export default function CustomerLayout() {
             </Link>
           </div>
         </div>
+
+        <nav className="mobile-top-nav drink-mobile-nav" aria-label={language === 'th' ? 'เมนูหลัก' : 'Main navigation'}>
+          <div className="container mobile-top-nav-inner">
+            <NavLink to="/">{t('home')}</NavLink>
+            <NavLink
+              to="/menu"
+              onClick={blockWhenClosed}
+              className={({ isActive }) => `${isActive ? 'active ' : ''}${closed ? 'nav-disabled' : ''}`}
+              aria-disabled={closed}
+            >
+              {t('menu')}
+            </NavLink>
+            <NavLink to="/points">{t('points')}</NavLink>
+            <NavLink to="/track">{t('track')}</NavLink>
+            <NavLink
+              to="/cart"
+              onClick={blockWhenClosed}
+              className={({ isActive }) => `${isActive ? 'active ' : ''}${closed ? 'nav-disabled' : ''}`}
+              aria-disabled={closed}
+            >
+              {t('cart')}{cartCount ? ` (${cartCount})` : ''}
+            </NavLink>
+          </div>
+        </nav>
       </header>
       <main>
         <Outlet context={{ shopSettings, shopOpen, shopStatusLoading }} />
