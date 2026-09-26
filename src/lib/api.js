@@ -16,6 +16,19 @@ function demoOrderNumber(count) {
   return `NAJ-${date}-${String(count + 1).padStart(4, '0')}`
 }
 
+function demoTrackingCode(existingOrders = []) {
+  const used = new Set(existingOrders.map((order) => String(order.tracking_code || '').toUpperCase()))
+  let code = ''
+
+  do {
+    const bytes = new Uint8Array(4)
+    crypto.getRandomValues(bytes)
+    code = Array.from(bytes, (value) => value.toString(16).padStart(2, '0')).join('').toUpperCase()
+  } while (used.has(code))
+
+  return code
+}
+
 export async function getShopSettings() {
   if (!supabaseConfigured) return demoStore.get().settings
   const { data, error } = await supabase.from('shop_settings').select('*').eq('id', 1).single()
@@ -235,6 +248,7 @@ export async function createOrder(payload) {
         id: crypto.randomUUID(),
         order_number: demoOrderNumber(db.orders.length),
         tracking_token: crypto.randomUUID(),
+        tracking_code: demoTrackingCode(db.orders),
         customer_id: customer.id,
         customer_name: customer.name,
         customer_phone: customer.phone,
@@ -256,7 +270,12 @@ export async function createOrder(payload) {
         order_items: lines,
       }
       db.orders.unshift(order)
-      result = { order_number: order.order_number, tracking_token: order.tracking_token, total: order.total }
+      result = {
+        order_number: order.order_number,
+        tracking_code: order.tracking_code,
+        tracking_token: order.tracking_token,
+        total: order.total,
+      }
       return db
     })
     return result
@@ -270,7 +289,11 @@ export async function createOrder(payload) {
 export async function trackOrder(token) {
   if (!token) return null
   if (!supabaseConfigured) {
-    const order = demoStore.get().orders.find((x) => x.tracking_token === token)
+    const lookup = String(token).trim().toUpperCase()
+    const order = demoStore.get().orders.find((x) =>
+      String(x.tracking_code || '').toUpperCase() === lookup ||
+      String(x.tracking_token || '').toUpperCase() === lookup
+    )
     return order || null
   }
   const { data, error } = await supabase.rpc('get_order_by_token', { p_token: token })
