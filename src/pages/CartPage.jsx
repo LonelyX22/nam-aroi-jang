@@ -15,10 +15,10 @@ export default function CartPage() {
         <div className="cart-list">
           {cart.map((item) => {
             const name = language === 'th' ? item.product.name_th : item.product.name_en
-            return <div className="cart-item" key={item.key}><div className="mini-art">{item.product.emoji || '🥤'}</div><div className="cart-item-main"><strong>{name}</strong><span>หวาน {item.sweetness}% • {formatMoney(item.product.price)}/แก้ว</span></div><div className="stepper"><button onClick={() => updateCart(item.key, item.quantity - 1)}>−</button><strong>{item.quantity}</strong><button onClick={() => updateCart(item.key, item.quantity + 1)}>+</button></div><strong>{formatMoney(item.product.price * item.quantity)}</strong></div>
+            return <div className="cart-item" key={item.key}><div className="mini-art">{item.product.emoji || '🥤'}</div><div className="cart-item-main"><strong>{name}</strong><span>{t('cartSweetness')} {item.sweetness}% • {formatMoney(item.product.price)}{t('perCup')}</span></div><div className="stepper"><button onClick={() => updateCart(item.key, item.quantity - 1)}>−</button><strong>{item.quantity}</strong><button onClick={() => updateCart(item.key, item.quantity + 1)}>+</button></div><strong>{formatMoney(item.product.price * item.quantity)}</strong></div>
           })}
         </div>
-        <div className="cart-summary"><div><span>{t('subtotal')}</span><strong>{formatMoney(cartSubtotal)}</strong></div><small>ส่วนลด/โปรโมชั่นจะคำนวณในหน้า Checkout</small><Link to="/checkout" className="button button-primary button-wide">{t('checkout')} →</Link></div>
+        <div className="cart-summary"><div><span>{t('subtotal')}</span><strong>{formatMoney(cartSubtotal)}</strong></div><small>{t('discountAtCheckout')}</small><Link to="/checkout" className="button button-primary button-wide">{t('checkout')} →</Link></div>
       </div>
     </section>
   )
