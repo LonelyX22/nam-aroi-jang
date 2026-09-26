@@ -80,6 +80,7 @@ create table if not exists public.orders (
   id uuid primary key default gen_random_uuid(),
   order_number text not null unique,
   tracking_token uuid not null default gen_random_uuid() unique,
+  tracking_code text not null unique,
   customer_id uuid not null references public.customers(id),
   customer_name text not null,
   customer_phone text not null,
@@ -229,17 +230,32 @@ returns jsonb
 language plpgsql
 security definer
 set search_path = public
-as $$
+as $
 declare
   v_order public.orders%rowtype;
   v_items jsonb;
+  v_lookup text := upper(trim(coalesce(p_token, '')));
 begin
-  begin
-    select * into v_order from public.orders where tracking_token = p_token::uuid;
-  exception when invalid_text_representation then
-    return null;
-  end;
+  if v_lookup = '' then return null; end if;
+
+  select * into v_order
+  from public.orders
+  where upper(tracking_code) = v_lookup
+  limit 1;
+
+  if not found then
+    begin
+      select * into v_order
+      from public.orders
+      where tracking_token = trim(p_token)::uuid
+      limit 1;
+    exception when invalid_text_representation then
+      return null;
+    end;
+  end if;
+
   if not found then return null; end if;
+
   select coalesce(jsonb_agg(jsonb_build_object(
     'id', oi.id,
     'product_id', oi.product_id,
@@ -253,6 +269,7 @@ begin
 
   return jsonb_build_object(
     'order_number', v_order.order_number,
+    'tracking_code', v_order.tracking_code,
     'tracking_token', v_order.tracking_token,
     'fulfillment_type', v_order.fulfillment_type,
     'payment_method', v_order.payment_method,
@@ -267,7 +284,7 @@ begin
     'order_items', v_items
   );
 end;
-$$;
+$;
 
 create or replace function public.create_order(p_payload jsonb)
 returns jsonb
@@ -282,6 +299,7 @@ declare
   v_promo public.promotions%rowtype;
   v_order_id uuid := gen_random_uuid();
   v_tracking uuid := gen_random_uuid();
+  v_tracking_code text;
   v_order_number text;
   v_phone text;
   v_name text;
@@ -407,13 +425,18 @@ begin
   v_total := greatest(v_subtotal - v_discount + v_delivery_fee, 0);
   v_order_number := 'NAJ-' || to_char(timezone('Asia/Bangkok', now()), 'YYMMDD') || '-' || lpad(nextval('public.order_number_seq')::text, 6, '0');
 
+  loop
+    v_tracking_code := upper(substr(replace(gen_random_uuid()::text, '-', ''), 1, 8));
+    exit when not exists (select 1 from public.orders where tracking_code = v_tracking_code);
+  end loop;
+
   insert into public.orders (
-    id, order_number, tracking_token, customer_id, customer_name, customer_phone,
+    id, order_number, tracking_token, tracking_code, customer_id, customer_name, customer_phone,
     fulfillment_type, delivery_address, payment_method, payment_status, slip_path, note,
     status, subtotal, discount, delivery_fee, total, promotion_id,
     points_redeemed, points_to_earn
   ) values (
-    v_order_id, v_order_number, v_tracking, v_customer.id, v_customer.name, v_customer.phone,
+    v_order_id, v_order_number, v_tracking, v_tracking_code, v_customer.id, v_customer.name, v_customer.phone,
     v_fulfillment, case when v_fulfillment='delivery' then v_delivery else null end,
     v_payment, case when v_payment in ('promptpay','bank_transfer') then 'pending_review' else 'unpaid' end,
     v_slip, v_note, 'pending', v_subtotal, v_discount, v_delivery_fee, v_total, v_promo_id,
@@ -439,7 +462,7 @@ begin
     values (v_customer.id, v_order_id, -v_points_redeemed, 'redeem', 'แลกเครื่องดื่มฟรี 1 แก้ว');
   end if;
 
-  return jsonb_build_object('order_number', v_order_number, 'tracking_token', v_tracking, 'total', v_total);
+  return jsonb_build_object('order_number', v_order_number, 'tracking_code', v_tracking_code, 'tracking_token', v_tracking, 'total', v_total);
 end;
 $$;
 
