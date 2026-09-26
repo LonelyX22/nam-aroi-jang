@@ -31,9 +31,24 @@ export default function CustomerLayout() {
   useEffect(() => {
     if (!shopSettings) return undefined
 
-    const refreshClockStatus = () => setShopOpen(shopIsOpen(shopSettings))
-    const timer = window.setInterval(refreshClockStatus, 30000)
-    return () => window.clearInterval(timer)
+    let active = true
+
+    const refreshStatus = async () => {
+      try {
+        const latest = await getShopSettings()
+        if (!active) return
+        setShopSettings(latest)
+        setShopOpen(shopIsOpen(latest))
+      } catch {
+        if (active) setShopOpen(shopIsOpen(shopSettings))
+      }
+    }
+
+    const timer = window.setInterval(refreshStatus, 15000)
+    return () => {
+      active = false
+      window.clearInterval(timer)
+    }
   }, [shopSettings])
 
   const closed = !shopStatusLoading && !shopOpen
