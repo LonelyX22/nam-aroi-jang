@@ -24,6 +24,7 @@ create table if not exists public.shop_settings (
   open_time time not null default '08:00',
   close_time time not null default '20:00',
   force_closed boolean not null default false,
+  force_open boolean not null default false,
   delivery_fee numeric(10,2) not null default 0 check (delivery_fee >= 0),
   delivery_province text not null default 'นครปฐม',
   promptpay text not null default '06-1564-0529',
@@ -308,7 +309,8 @@ declare
 begin
   select * into v_settings from public.shop_settings where id = 1;
   if not found then raise exception 'Shop settings not found'; end if;
-  if v_settings.force_closed or v_now_time < v_settings.open_time or v_now_time >= v_settings.close_time then
+  if not v_settings.force_open
+     and (v_settings.force_closed or v_now_time < v_settings.open_time or v_now_time >= v_settings.close_time) then
     raise exception 'ร้านปิดรับออเดอร์ในขณะนี้';
   end if;
 
