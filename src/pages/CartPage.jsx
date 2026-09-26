@@ -1,9 +1,12 @@
-import { Link } from 'react-router-dom'
+import { Link, useOutletContext } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { formatMoney } from '../lib/format'
+import ClosedStoreNotice from '../components/ClosedStoreNotice'
 
 export default function CartPage() {
   const { cart, updateCart, cartSubtotal, language, t } = useApp()
+  const { shopOpen, shopStatusLoading } = useOutletContext()
+  if (!shopStatusLoading && !shopOpen) return <section className="section page-section"><div className="container narrow-container"><ClosedStoreNotice /></div></section>
   if (!cart.length) return <section className="section page-section"><div className="container"><div className="empty-state">🛒<h2>{t('emptyCart')}</h2><Link className="button button-primary" to="/menu">{t('menu')}</Link></div></div></section>
   return (
     <section className="section page-section">
