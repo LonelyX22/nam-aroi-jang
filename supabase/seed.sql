@@ -1,9 +1,9 @@
 insert into public.shop_settings (
   id, shop_name_th, shop_name_en, phone, open_time, close_time,
-  delivery_fee, delivery_province, promptpay, force_closed
+  delivery_fee, delivery_province, promptpay, force_closed, force_open
 ) values (
   1, 'น้ำอร่อยจัง', 'Nam Aroi Jang', '06-1564-0529', '08:00', '20:00',
-  0, 'นครปฐม', '06-1564-0529', false
+  0, 'นครปฐม', '06-1564-0529', false, false
 )
 on conflict (id) do update set
   shop_name_th = excluded.shop_name_th,
