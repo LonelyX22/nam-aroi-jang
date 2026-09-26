@@ -192,8 +192,8 @@ begin
     new.id,
     coalesce(new.email, ''),
     coalesce(new.raw_user_meta_data ->> 'display_name', split_part(coalesce(new.email,''), '@', 1)),
-    case when lower(coalesce(new.email,'')) = 'o5170797@gmail.com' then 'owner' else 'staff' end,
-    case when lower(coalesce(new.email,'')) = 'o5170797@gmail.com' then true else false end
+    case when lower(coalesce(new.email,'')) = 'namaual@gmail.com' then 'owner' else 'staff' end,
+    case when lower(coalesce(new.email,'')) = 'namaual@gmail.com' then true else false end
   )
   on conflict (id) do update set
     email = excluded.email,
