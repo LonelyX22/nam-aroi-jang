@@ -648,3 +648,58 @@ th { color: #8c7169; font-size: 11px; text-transform: uppercase; letter-spacing:
 .shop-mode-actions .button {
   min-width: 140px;
 }
+
+
+/* Short order tracking code */
+.tracking-code-card {
+  margin: 14px 0 18px;
+  padding: 18px;
+  border: 2px dashed var(--pink-2);
+  border-radius: 20px;
+  background: #fff4f7;
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+}
+
+.tracking-code-card > span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.tracking-code-card > strong {
+  color: var(--brown);
+  font-size: clamp(30px, 6vw, 42px);
+  letter-spacing: .12em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  user-select: all;
+}
+
+.tracking-code-card > small {
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+
+.tracking-inline-code,
+.admin-tracking-code {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  margin-top: 5px;
+  padding: 4px 8px;
+  border-radius: 9px;
+  background: #fff0f4;
+  color: var(--brown);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .06em;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-tracking-code.large {
+  padding: 7px 10px;
+  font-size: 14px;
+  letter-spacing: .08em;
+}
