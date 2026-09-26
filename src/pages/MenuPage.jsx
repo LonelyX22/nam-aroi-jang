@@ -20,10 +20,6 @@ export default function MenuPage() {
       .finally(() => setLoading(false))
   }, [])
 
-  if (!shopStatusLoading && !shopOpen) {
-    return <section className="section page-section"><div className="container narrow-container"><ClosedStoreNotice /></div></section>
-  }
-
   const filtered = useMemo(() => products.filter((p) => {
     const name = `${p.name_th} ${p.name_en}`.toLowerCase()
     return name.includes(query.toLowerCase())
