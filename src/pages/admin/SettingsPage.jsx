@@ -25,6 +25,34 @@ export default function SettingsPage() {
       .catch((e) => setError(e.message))
   }, [])
 
+  async function setShopMode(mode) {
+    setSaving(true)
+    setError('')
+    setMessage('')
+
+    try {
+      const patch = mode === 'open'
+        ? { force_open: true, force_closed: false }
+        : mode === 'closed'
+          ? { force_open: false, force_closed: true }
+          : { force_open: false, force_closed: false }
+
+      const saved = await updateShopSettings(patch)
+      setForm((current) => ({ ...current, ...saved }))
+      setMessage(
+        mode === 'open'
+          ? 'เปิดร้านแล้ว — ระบบจะรับออเดอร์โดยไม่ยึดตามเวลา'
+          : mode === 'closed'
+            ? 'ปิดร้านแล้ว — ระบบหยุดรับออเดอร์ทันที'
+            : 'กลับมาใช้เวลาเปิด-ปิดอัตโนมัติแล้ว'
+      )
+    } catch (e2) {
+      setError(e2.message || 'เปลี่ยนสถานะร้านไม่สำเร็จ')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   async function submit(e) {
     e.preventDefault()
     setSaving(true)
@@ -178,17 +206,55 @@ export default function SettingsPage() {
           </label>
         </div>
 
-        <label className="danger-toggle">
-          <input
-            type="checkbox"
-            checked={Boolean(form.force_closed)}
-            onChange={(e) => setForm({ ...form, force_closed: e.target.checked })}
-          />
-          <span>
-            <strong>ปิดรับ Order ชั่วคราว</strong>
-            <small>เปิดตัวเลือกนี้เมื่อต้องการปิดร้านแม้อยู่ในเวลาเปิด</small>
-          </span>
-        </label>
+        <h2>สถานะร้าน</h2>
+
+        <div className="shop-mode-panel">
+          <div className="shop-mode-status">
+            <strong>
+              {form.force_open
+                ? '🟢 เปิดร้านแบบ Manual'
+                : form.force_closed
+                  ? '🔴 ปิดร้านแบบ Manual'
+                  : '🕒 ใช้เวลาเปิด-ปิดอัตโนมัติ'}
+            </strong>
+            <small>
+              {form.force_open
+                ? 'รับออเดอร์ได้ตลอดจนกว่าจะเปลี่ยนโหมด'
+                : form.force_closed
+                  ? 'หยุดรับออเดอร์ทันทีจนกว่าจะเปลี่ยนโหมด'
+                  : 'เปิด 08:00 - 20:00 ตามเวลาที่กำหนด'}
+            </small>
+          </div>
+
+          <div className="shop-mode-actions">
+            <button
+              type="button"
+              className={`button ${form.force_open ? 'button-primary' : 'button-soft'}`}
+              onClick={() => setShopMode('open')}
+              disabled={saving}
+            >
+              🟢 เปิดร้าน
+            </button>
+
+            <button
+              type="button"
+              className={`button ${!form.force_open && !form.force_closed ? 'button-primary' : 'button-soft'}`}
+              onClick={() => setShopMode('auto')}
+              disabled={saving}
+            >
+              🕒 ตามเวลา
+            </button>
+
+            <button
+              type="button"
+              className={`button ${form.force_closed ? 'button-primary' : 'button-soft'}`}
+              onClick={() => setShopMode('closed')}
+              disabled={saving}
+            >
+              🔴 ปิดร้าน
+            </button>
+          </div>
+        </div>
 
         <button className="button button-primary" disabled={saving}>
           {saving ? 'กำลังบันทึก...' : 'บันทึกการตั้งค่า'}
