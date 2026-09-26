@@ -1,13 +1,58 @@
 import { NavLink, Outlet, Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import { useApp } from '../context/AppContext'
 import { SHOP } from '../lib/constants'
 import { supabaseConfigured } from '../lib/supabase'
+import { getShopSettings } from '../lib/api'
+import { shopIsOpen } from '../lib/format'
 
 export default function CustomerLayout() {
   const { language, setLanguage, t, cartCount } = useApp()
+  const [shopSettings, setShopSettings] = useState(null)
+  const [shopOpen, setShopOpen] = useState(false)
+  const [shopStatusLoading, setShopStatusLoading] = useState(true)
+
+  useEffect(() => {
+    let mounted = true
+    let timer
+
+    async function refreshStatus() {
+      try {
+        const settings = await getShopSettings()
+        if (!mounted) return
+        setShopSettings(settings)
+        setShopOpen(shopIsOpen(settings))
+      } finally {
+        if (mounted) setShopStatusLoading(false)
+      }
+    }
+
+    refreshStatus()
+    timer = window.setInterval(() => {
+      if (shopSettings) setShopOpen(shopIsOpen(shopSettings))
+      else refreshStatus()
+    }, 30000)
+
+    return () => {
+      mounted = false
+      window.clearInterval(timer)
+    }
+  }, [shopSettings])
+
+  const closed = !shopStatusLoading && !shopOpen
+
+  function blockWhenClosed(event) {
+    if (closed) event.preventDefault()
+  }
+
   return (
     <div className="site-shell">
       {!supabaseConfigured && <div className="demo-banner">DEMO MODE — ยังไม่เชื่อม Supabase ข้อมูลจะอยู่เฉพาะ Browser นี้</div>}
+      {closed && (
+        <div className="closed-strip" role="status">
+          🌙 ร้านปิดแล้ว • เปิดรับออเดอร์ 08:00 - 20:00 • ยังเช็คแต้มและติดตามออเดอร์ได้
+        </div>
+      )}
       <header className="customer-header">
         <div className="container header-inner">
           <Link to="/" className="brand-link">
@@ -19,7 +64,14 @@ export default function CustomerLayout() {
           </Link>
           <nav className="desktop-nav">
             <NavLink to="/">{t('home')}</NavLink>
-            <NavLink to="/menu">{t('menu')}</NavLink>
+            <NavLink
+              to="/menu"
+              onClick={blockWhenClosed}
+              className={({ isActive }) => `${isActive ? 'active ' : ''}${closed ? 'nav-disabled' : ''}`}
+              aria-disabled={closed}
+            >
+              {t('menu')}
+            </NavLink>
             <NavLink to="/points">{t('points')}</NavLink>
             <NavLink to="/track">{t('track')}</NavLink>
           </nav>
@@ -27,11 +79,20 @@ export default function CustomerLayout() {
             <button className="language-switch" onClick={() => setLanguage(language === 'th' ? 'en' : 'th')} aria-label="Switch language">
               {language === 'th' ? 'EN' : 'TH'}
             </button>
-            <Link to="/cart" className="cart-button">🛒 <span>{cartCount}</span></Link>
+            <Link
+              to="/cart"
+              onClick={blockWhenClosed}
+              className={`cart-button ${closed ? 'nav-disabled' : ''}`}
+              aria-disabled={closed}
+            >
+              🛒 <span>{cartCount}</span>
+            </Link>
           </div>
         </div>
       </header>
-      <main><Outlet /></main>
+      <main>
+        <Outlet context={{ shopSettings, shopOpen, shopStatusLoading }} />
+      </main>
       <footer className="customer-footer">
         <div className="container footer-grid">
           <div><strong>{SHOP.nameTh}</strong><p>เปิดทุกวัน {SHOP.openTime} - {SHOP.closeTime}</p></div>
@@ -41,10 +102,24 @@ export default function CustomerLayout() {
       </footer>
       <nav className="mobile-bottom-nav">
         <NavLink to="/">🏠<span>{t('home')}</span></NavLink>
-        <NavLink to="/menu">🥤<span>{t('menu')}</span></NavLink>
+        <NavLink
+          to="/menu"
+          onClick={blockWhenClosed}
+          className={({ isActive }) => `${isActive ? 'active ' : ''}${closed ? 'nav-disabled' : ''}`}
+          aria-disabled={closed}
+        >
+          🥤<span>{t('menu')}</span>
+        </NavLink>
         <NavLink to="/points">⭐<span>{t('points')}</span></NavLink>
         <NavLink to="/track">📦<span>{t('track')}</span></NavLink>
-        <NavLink to="/cart">🛒<span>{t('cart')} {cartCount ? `(${cartCount})` : ''}</span></NavLink>
+        <NavLink
+          to="/cart"
+          onClick={blockWhenClosed}
+          className={({ isActive }) => `${isActive ? 'active ' : ''}${closed ? 'nav-disabled' : ''}`}
+          aria-disabled={closed}
+        >
+          🛒<span>{t('cart')} {cartCount ? `(${cartCount})` : ''}</span>
+        </NavLink>
       </nav>
     </div>
   )
