@@ -9,32 +9,37 @@ import { useApp } from '../context/AppContext'
 export default function TrackOrderPage() {
   const { t, language } = useApp()
   const [params, setParams] = useSearchParams()
-  const [token, setToken] = useState(params.get('token') || '')
+  const initialCode = params.get('code') || params.get('token') || ''
+  const [trackingCode, setTrackingCode] = useState(initialCode)
   const [order, setOrder] = useState(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  async function search(value = token) {
+  async function search(value = trackingCode) {
     if (!value.trim()) return
     setLoading(true); setError('')
     try {
       const data = await trackOrder(value.trim())
       if (!data) throw new Error(t('orderNotFound'))
-      setOrder(data); setParams({ token: value.trim() }, { replace: true })
+      const normalized = value.trim().toUpperCase()
+      setOrder(data); setTrackingCode(normalized); setParams({ code: normalized }, { replace: true })
     } catch (e) { setOrder(null); setError(e.message) } finally { setLoading(false) }
   }
 
-  useEffect(() => { if (params.get('token')) search(params.get('token')) }, [])
+  useEffect(() => {
+    const code = params.get('code') || params.get('token')
+    if (code) search(code)
+  }, [])
   useEffect(() => {
     if (!order || ['completed', 'cancelled'].includes(order.status)) return
-    const timer = setInterval(() => trackOrder(order.tracking_token || token).then((x) => x && setOrder(x)).catch(() => {}), 5000)
+    const timer = setInterval(() => trackOrder(order.tracking_code || order.tracking_token || trackingCode).then((x) => x && setOrder(x)).catch(() => {}), 5000)
     return () => clearInterval(timer)
   }, [order?.status, order?.tracking_token])
 
   const flow = order?.fulfillment_type === 'delivery' ? ['pending', 'accepted', 'preparing', 'ready', 'delivering', 'completed'] : ['pending', 'accepted', 'preparing', 'ready', 'completed']
   const currentIndex = order ? flow.indexOf(order.status) : -1
 
-  return <section className="section page-section"><div className="container narrow-container"><div className="page-title"><span className="eyebrow">ORDER TRACKING</span><h1>{t('trackTitle')}</h1><p>{t('trackHelp')}</p></div><div className="track-search"><input value={token} onChange={(e) => setToken(e.target.value)} placeholder="Tracking code" /><button className="button button-primary" onClick={() => search()} disabled={loading}>{loading ? '...' : t('search')}</button></div>{error && <div className="alert alert-error">{error}</div>}{order && <div className="tracking-card"><div className="tracking-head"><div><span>Order</span><h2>{order.order_number}</h2><small>{formatDateTime(order.created_at, language)}</small></div><StatusBadge status={order.status} language={language} /></div>{order.status === 'cancelled' ? <div className="cancel-box">{t('orderCancelled')}</div> : <div className="status-timeline">{flow.map((status, index) => <div key={status} className={index <= currentIndex ? 'done' : ''}><i>{index < currentIndex ? '✓' : index === currentIndex ? '●' : ''}</i><span>{ORDER_STATUSES.includes(status) ? ({
+  return <section className="section page-section"><div className="container narrow-container"><div className="page-title"><span className="eyebrow">ORDER TRACKING</span><h1>{t('trackTitle')}</h1><p>{t('trackHelp')}</p></div><div className="track-search"><input value={trackingCode} onChange={(e) => setTrackingCode(e.target.value.toUpperCase())} placeholder="Tracking code" maxLength={36} autoCapitalize="characters" /><button className="button button-primary" onClick={() => search()} disabled={loading}>{loading ? '...' : t('search')}</button></div>{error && <div className="alert alert-error">{error}</div>}{order && <div className="tracking-card"><div className="tracking-head"><div><span>Order</span><h2>{order.order_number}</h2>{order.tracking_code && <div className="tracking-inline-code">🔎 {order.tracking_code}</div>}<small>{formatDateTime(order.created_at, language)}</small></div><StatusBadge status={order.status} language={language} /></div>{order.status === 'cancelled' ? <div className="cancel-box">{t('orderCancelled')}</div> : <div className="status-timeline">{flow.map((status, index) => <div key={status} className={index <= currentIndex ? 'done' : ''}><i>{index < currentIndex ? '✓' : index === currentIndex ? '●' : ''}</i><span>{ORDER_STATUSES.includes(status) ? ({
   pending: language === 'th' ? 'รอรับ Order' : 'Pending',
   accepted: language === 'th' ? 'รับ Order แล้ว' : 'Accepted',
   preparing: language === 'th' ? 'กำลังทำ' : 'Preparing',
