@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useOutletContext } from 'react-router-dom'
 import { getProduct } from '../lib/api'
 import { formatMoney } from '../lib/format'
 import { SWEETNESS_LEVELS } from '../lib/constants'
 import { useApp } from '../context/AppContext'
+import ClosedStoreNotice from '../components/ClosedStoreNotice'
 
 export default function ProductDetailPage() {
   const { id } = useParams()
@@ -13,11 +14,13 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true)
   const [quantity, setQuantity] = useState(1)
   const [sweetness, setSweetness] = useState(100)
+  const { shopOpen, shopStatusLoading } = useOutletContext()
 
   useEffect(() => {
     getProduct(id).then(setProduct).finally(() => setLoading(false))
   }, [id])
 
+  if (!shopStatusLoading && !shopOpen) return <section className="section page-section"><div className="container narrow-container"><ClosedStoreNotice /></div></section>
   if (loading) return <div className="page-loader">กำลังโหลด...</div>
   if (!product) return <div className="center-card"><h2>ไม่พบเมนู</h2><Link to="/menu">กลับหน้าเมนู</Link></div>
 
