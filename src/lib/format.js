@@ -2,9 +2,12 @@ export function formatMoney(value) {
   return new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB', maximumFractionDigits: 0 }).format(Number(value || 0))
 }
 
-export function formatDateTime(value) {
+export function formatDateTime(value, language = 'th') {
   if (!value) return '-'
-  return new Intl.DateTimeFormat('th-TH', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value))
+  return new Intl.DateTimeFormat(language === 'en' ? 'en-GB' : 'th-TH', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+  }).format(new Date(value))
 }
 
 export function normalizePhone(value = '') {
