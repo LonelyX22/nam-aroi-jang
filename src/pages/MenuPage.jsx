@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useOutletContext } from 'react-router-dom'
 import ProductCard from '../components/ProductCard'
 import { listProducts } from '../lib/api'
 import { useApp } from '../context/AppContext'
+import ClosedStoreNotice from '../components/ClosedStoreNotice'
 
 export default function MenuPage() {
   const { t, language } = useApp()
@@ -9,6 +11,7 @@ export default function MenuPage() {
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const { shopOpen, shopStatusLoading } = useOutletContext()
 
   useEffect(() => {
     listProducts()
@@ -16,6 +19,10 @@ export default function MenuPage() {
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false))
   }, [])
+
+  if (!shopStatusLoading && !shopOpen) {
+    return <section className="section page-section"><div className="container narrow-container"><ClosedStoreNotice /></div></section>
+  }
 
   const filtered = useMemo(() => products.filter((p) => {
     const name = `${p.name_th} ${p.name_en}`.toLowerCase()
