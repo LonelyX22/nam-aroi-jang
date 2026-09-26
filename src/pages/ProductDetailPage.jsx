@@ -21,8 +21,8 @@ export default function ProductDetailPage() {
   }, [id])
 
   if (!shopStatusLoading && !shopOpen) return <section className="section page-section"><div className="container narrow-container"><ClosedStoreNotice /></div></section>
-  if (loading) return <div className="page-loader">กำลังโหลด...</div>
-  if (!product) return <div className="center-card"><h2>ไม่พบเมนู</h2><Link to="/menu">กลับหน้าเมนู</Link></div>
+  if (loading) return <div className="page-loader">{language === 'th' ? 'กำลังโหลด...' : 'Loading...'}</div>
+  if (!product) return <div className="center-card"><h2>{t('noMenu')}</h2><Link to="/menu">{t('backToMenu')}</Link></div>
 
   const name = language === 'th' ? product.name_th : product.name_en
   const ingredients = language === 'th' ? product.ingredients_th : product.ingredients_en
@@ -42,7 +42,7 @@ export default function ProductDetailPage() {
           <div className="detail-price">{formatMoney(product.price)}</div>
           <div className="info-grid">
             <div className="info-card"><strong>🥛 {t('ingredients')}</strong><ul>{(ingredients || []).map((x) => <li key={x}>{x}</li>)}</ul></div>
-            <div className="info-card"><strong>🔥 {t('calories')}</strong><span className="big-number">{product.calories} kcal</span><small>ค่าประมาณต่อ 1 แก้ว</small></div>
+            <div className="info-card"><strong>🔥 {t('calories')}</strong><span className="big-number">{product.calories} kcal</span><small>{t('calorieNote')}</small></div>
           </div>
           <div className="choice-block"><label>{t('sweetness')}</label><div className="choice-pills">{SWEETNESS_LEVELS.map((level) => <button key={level} className={sweetness === level ? 'active' : ''} onClick={() => setSweetness(level)}>{level}%</button>)}</div></div>
           <div className="quantity-row"><label>{t('quantity')}</label><div className="stepper"><button onClick={() => setQuantity((v) => Math.max(1, v - 1))}>−</button><strong>{quantity}</strong><button onClick={() => setQuantity((v) => Math.min(20, v + 1))}>+</button></div></div>
