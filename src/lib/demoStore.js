@@ -24,6 +24,7 @@ const initial = {
     open_time: SHOP.openTime,
     close_time: SHOP.closeTime,
     force_closed: false,
+    force_open: false,
     delivery_fee: 0,
     delivery_province: SHOP.deliveryProvince,
     promptpay: SHOP.promptPay,
